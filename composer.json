@@ -1,0 +1,26 @@
+{
+  "name": "JoshSpivey/mage2-product-viewer",
+  "type": "magento2-module",
+  "description": "Product Viewer for Magento 2 Frontend",
+  "keywords": ["Magento2", "Frontend"],
+  "homepage": "https://github.com/joshspivey/",
+  "license": "AFL - Academic Free License (AFL 3.0)",
+  "version": "1.0.0",
+  "minimum-stability": "dev",
+  "authors": [
+    {
+      "name": "Josh Spivey"
+    }
+  ],
+  "require": {
+    "php": "~5.5.0|~5.6.0|~7.0.0"
+  },
+  "extra": {
+    "map": [
+      [
+        "*",
+        "JoshSpivey/ProductViewer"
+      ]
+    ]
+  }
+}

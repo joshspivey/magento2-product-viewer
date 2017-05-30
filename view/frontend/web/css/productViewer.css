@@ -1,0 +1,56 @@
+#amount{
+	border:0; 
+	color:#f6931f; 
+	font-weight:bold;
+}
+
+#low, #high {
+	border:1; 
+	color:#f6931f; 
+	font-weight:bold;
+	width: 100px;
+}
+
+.right{
+	float: right;
+}
+
+.left{
+	float: left;
+}
+
+#leftSide{
+	width: 192px;
+}
+
+#productContent{
+	float: right;
+	height: 500px;
+	width: 70%;
+}
+#range{
+	display: inline-block;
+	clear: none;
+}
+
+.primary{
+    margin-left: 14px;
+    margin-top: 14px;
+}
+
+.thumb{
+	max-width: 120px;
+	max-height: 120px;
+}
+
+#productList{
+	width: 700px;
+
+	list-style: none;
+}
+
+#productList li{
+	float: left;
+	width: 33.33%;
+	height: 170px;
+}

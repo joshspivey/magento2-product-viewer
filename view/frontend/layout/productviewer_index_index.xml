@@ -1,0 +1,12 @@
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd" layout="1column">
+	 <head>
+        <title>Product Viewer</title>
+        <css src="JoshSpivey_ProductViewer::css/jquery-ui.css" />
+        <css src="JoshSpivey_ProductViewer::css/productViewer.css" />
+    </head>
+    <body>
+        <referenceContainer name="content">
+            <block class="JoshSpivey\ProductViewer\Block\ProductViewer" name="productviewer" template="productviewer.phtml" />
+        </referenceContainer>
+    </body>
+</page>

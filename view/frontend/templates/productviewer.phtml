@@ -1,0 +1,75 @@
+<form class="form" id="custom-form"  autocomplete="off">
+
+<!-- <p>
+  <label for="amount">Price range:</label>
+  <input type="text" id="amount" readonly>
+
+</p> -->
+	<fieldset class="fieldset">
+	    <div class="row" id="productContent">
+        	<div class="col-sm-6">
+        		<ul id="productList"></ul>
+        	</div>
+
+        </div>
+		<div class="row" id="range">
+			<div class="left field required col-sm-12">
+			<label for="amount">Price range:</label>
+			<input type="text" id="amount" readonly>
+			<div id="slider-range"></div>
+			</div>
+    	</div>
+    	<div class="row" id="leftSide">
+	        <div class="left field required col-xs-2">
+	            <label for="low" class="label"><span><?php echo __('Min') ?></span></label>
+	            <div class="control">
+	                <input type="text" name="low" id="low" value="0" title="<?php echo __('Min') ?>" class="input-text" data-validate="{required:true, 'validate-integer':true}">
+	            </div>
+	        </div>
+	        <div class="right field required col-sm-2">
+	            <label for="high" class="label"><span><?php echo __('Max') ?></span></label>
+	            <div class="control">
+	                <input type="text" name="high" id="high" value="500" title="<?php echo __('Max') ?>" class="input-text" data-validate="{required:true, 'validate-integer':true}">
+	            </div>
+	        </div>
+	        <div class="left field required col-xs-2">
+				<select name="sort" id="sort">
+					
+					<option value="desc">DESC</option>
+				</select>
+	        </div>
+          	<div class="actions-toolbar">
+		        <div class="primary">
+		            <button id="getProducts" class="action submit primary" title="<?php  echo __('Get Products') ?>"><span><?php echo __('Get Products') ?></span></button>
+		        </div>
+		    </div>
+        </div>
+
+
+   </fieldset>
+
+
+</form>
+
+<script type="text/html" id="productTemplate">
+    <li>
+    	<img class="thumb" src="<%= thumb %>"><br />
+        <a href="<%= url %>"><%= name %></a></strong><br />
+        SKU: <%= sku %> QTY: <%= qty %><br />
+    </li>
+</script>
+
+<script>
+	require(['productViewer'], function(productViewer){
+		var pv = new productViewer();
+		pv.init({
+			button: "getProducts",
+			products: "productList",
+			productTPL: "productTemplate",
+			slider: "slider-range",
+			amount: "amount",
+			low: "low",
+			high: "high"
+		});
+	});
+</script>
