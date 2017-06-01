@@ -88,9 +88,6 @@ class Products extends \Magento\Framework\App\Action\Action
                   ->setValue($lowRange)
                   ->create();
 
-          $filter_group = $this->filterGroupBuilder
-            ->setFilters($filters)
-            ->create();
 
           $filter_group_status = $this->filterGroupBuilder
             ->setFilters($statusFilters)
