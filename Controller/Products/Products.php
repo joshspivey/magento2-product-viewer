@@ -17,18 +17,22 @@ class Products extends \Magento\Framework\App\Action\Action
         \Magento\Framework\App\Action\Context $context,
         \Magento\Catalog\Model\ProductRepository $productRepository,
         \Magento\Framework\Api\SearchCriteriaInterface $criteria,
+        \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
         \Magento\Framework\Api\Search\FilterGroup $filterGroup,
         \Magento\Framework\Api\FilterBuilder $filterBuilder,
         \Magento\Catalog\Model\Product\Attribute\Source\Status $productStatus,
-        \Magento\Catalog\Model\Product\Visibility $productVisibility
+        \Magento\Catalog\Model\Product\Visibility $productVisibility,
+        \Magento\Framework\Api\SortOrderBuilder $sortOrderBuilder
     ){
 
         $this->productRepository = $productRepository;
         $this->searchCriteria = $criteria;
+        $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->filterGroup = $filterGroup;
         $this->filterBuilder = $filterBuilder;
         $this->productStatus = $productStatus;
         $this->productVisibility = $productVisibility;
+        $this->sortOrderBuilder = $sortOrderBuilder;
         parent::__construct($context);
     }
 
@@ -46,54 +50,77 @@ class Products extends \Magento\Framework\App\Action\Action
 
         $perPage = $this->getRequest()->getParam('results_per_page');
         $page = $this->getRequest()->getParam('page');
-        $sortBy = ($this->getRequest()->getParam('sort_by'))? $this->getRequest()->getParam('sort_by') : 'created_at';
         $orderBy = ($this->getRequest()->getParam('order'))? $this->getRequest()->getParam('order') : 'DESC';
         $keyword = $this->getRequest()->getParam('keyword');
         $productSearch = $this->getRequest()->getParam('productSearch');
         $searchColumns = $this->getRequest()->getParam('searchColumns');
+        $lowRange = $this->getRequest()->getParam('low');
+        $highRange = $this->getRequest()->getParam('high');
 
-        // $sortOrder = $this->sortOrderBuilder
-        //     ->setField($sortBy)
-        //     ->setDirection($orderBy)
-        //     ->create();
+        if($lowRange < 0){
+            return 'Please select a number higher than 0.';
+        }else if($highRange - $lowRange < 500){
+            return 'The value must be more then 500 of the starting value.';
+        }else{
+        
+          $sortOrder = $this->sortOrderBuilder
+              ->setField('name')
+              ->setDirection($orderBy)
+              ->create();
 
-        $this->filterGroup->setFilters([
-            $this->filterBuilder
-                ->setField('status')
-                ->setConditionType('in')
-                ->setValue($this->productStatus->getVisibleStatusIds())
-                ->create(),
-            $this->filterBuilder
-                ->setField('visibility')
-                ->setConditionType('in')
-                ->setValue($this->productVisibility->getVisibleInSiteIds())
-                ->create(),
-        ]);
+          $filters[] = $this->filterBuilder
+                  ->setField('status')
+                  ->setConditionType('in')
+                  ->setValue($this->productStatus->getVisibleStatusIds())
+                  ->create();
 
-        $this->searchCriteria->setFilterGroups([$this->filterGroup])
-            // ->addSortOrder($sortOrder)
-            ->setPageSize($perPage)
-            ->setCurrentPage($page);
+          $filters[] = $this->filterBuilder
+                  ->setField('visibility')
+                  ->setConditionType('in')
+                  ->setValue($this->productVisibility->getVisibleInSiteIds())
+                  ->create();
+          
+          $filters[] = $this->filterBuilder
+                  ->setField('price')
+                  ->setConditionType('lteq')
+                  ->setValue($highRange)
+                  ->create();
 
-        $products = $this->productRepository->getList($this->searchCriteria);
-        $productItems = $products->getItems();
+          $filters[] = $this->filterBuilder
+                  ->setField('price')
+                  ->setConditionType('gteq')
+                  ->setValue($lowRange)
+                  ->create();
 
-        $returnArray = [];
-        $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
-        $store = $objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStore();
-        foreach($productItems as $product)
-        {
-          $productStockObj = $objectManager->get('Magento\CatalogInventory\Api\StockRegistryInterface')->getStockItem($product->getId());
+          $this->searchCriteria = $this->searchCriteriaBuilder
+                  ->setPageSize($perPage)
+                  ->setCurrentPage($page)
+                  ->addSortOrder($sortOrder)
+                  ->addFilters($filters)
+                  ->create();
 
-          array_push($returnArray, [
-            "name"=>$product->getName(), 
-            "sku"=>$product->getSku(), 
-            "qty"=>$productStockObj->getQty(), 
-            "thumb" => $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' .$product->getData('thumbnail'), 
-            "url" => $product->getProductUrl() 
-          ]);
+          $products = $this->productRepository->getList($this->searchCriteria);
+          $productItems = $products->getItems();
+
+          $returnArray = [];
+          $objectManager = \Magento\Framework\App\ObjectManager::getInstance();
+          $store = $objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStore();
+          foreach($productItems as $product)
+          {
+            $productStockObj = $objectManager->get('Magento\CatalogInventory\Api\StockRegistryInterface')->getStockItem($product->getId());
+
+            array_push($returnArray, [
+              "name"=>$product->getName(), 
+              "sku"=>$product->getSku(), 
+              "qty"=>$productStockObj->getQty(), 
+              "thumb" => $store->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_MEDIA) . 'catalog/product' .$product->getData('thumbnail'), 
+              "url" => $product->getProductUrl() 
+            ]);
+          }
+
+          return $returnArray;
         }
-
-        return $returnArray;
     }
+
+
 }

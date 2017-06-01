@@ -24,17 +24,24 @@ define([
         });
 
         $("#"+this.config.low).on('change', function(evt){
-            console.log($(evt.target).val());
+            self.validate();
         });
 
         $("#"+this.config.high).on('change', function(evt){
-            console.log($(evt.target).val());
+            self.validate();
         });
     };
 
-    ProductViewer.prototype.validate = function() {
+    ProductViewer.prototype.validate = function(cb = function(){}) {
 
-
+        if($("#"+this.config.low).val() < 0){
+            cb('error', 'Please select a number higher than 0.');
+        }else if($("#"+this.config.high).val() - $("#"+this.config.low).val() < 500){
+            cb('error', 'The value must be more then 500 of the starting value.');
+        }else{
+            cb('success', '');
+        }
+        
     };
 
 
@@ -46,11 +53,25 @@ define([
 
         $("#"+this.config.slider).slider({
             range: true,
-            min: low,
-            max: high,
-            values: [low+20, high-20],
+            min: 0,
+            max: 1000,
+            minRange: 500,
+            step: 1,
+            values: [low, high],
             slide: function(event, ui) {
-                $("#"+self.config.amount).val("$" + ui.values[0] + " - $" + ui.values[1]);
+                if(ui.values[1] - ui.values[0] <= 500){
+                    // do not allow change
+                    ui.values[1] = ui.values[0] + 500;
+                    return false;
+                } else {
+                    // allow change
+                    $("#"+self.config.amount).val("$" + ui.values[0] + " - $" + ui.values[1]); 
+                }   
+                
+            },
+            stop: function(event, ui){
+                $("#"+self.config.low).val(ui.values[0]);
+                $("#"+self.config.high).val(ui.values[1]);
             }
         });
         $("#"+this.config.amount).val("$" + $("#"+this.config.slider).slider("values", 0) +
@@ -63,14 +84,30 @@ define([
 
     ProductViewer.prototype.loadProducts = function() {
         var self = this;
-
-        $.ajax({ 
-            type: 'GET', 
-            url: '/productviewer/products/products', 
-            data: { results_per_page: 10, page: 1 }, 
-            dataType: 'json',
-            success: function (data) { 
-                self.renderProducts(data);
+        this.validate(function(type, msg){
+            if(type === "error"){
+                alert(msg);
+            }
+            if(type === "success"){
+                $.ajax({ 
+                    type: 'GET', 
+                    url: '/productviewer/products/products', 
+                    data: { 
+                        results_per_page: 10, 
+                        page: 1, 
+                        order: $('#sort').val(), 
+                        low: $("#"+self.config.low).val(),
+                        high: $("#"+self.config.high).val() 
+                    }, 
+                    dataType: 'json',
+                    success: function (data) { 
+                        if(typeof data === String){
+                            alert(data);
+                        }else{
+                            self.renderProducts(data);
+                        }
+                    }
+                });
             }
         });
     };
