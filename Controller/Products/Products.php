@@ -4,7 +4,6 @@ namespace JoshSpivey\ProductViewer\Controller\Products;
  
 class Products extends \Magento\Framework\App\Action\Action
 {
-    /** @var \Magento\Framework\View\Result\PageFactory  */
 
     protected $searchCriteriaBuilder;
     protected $filterBuilder;
@@ -19,6 +18,7 @@ class Products extends \Magento\Framework\App\Action\Action
         \Magento\Framework\Api\SearchCriteriaInterface $criteria,
         \Magento\Framework\Api\SearchCriteriaBuilder $searchCriteriaBuilder,
         \Magento\Framework\Api\Search\FilterGroup $filterGroup,
+        \Magento\Framework\Api\Search\FilterGroupBuilder $filterGroupBuilder,
         \Magento\Framework\Api\FilterBuilder $filterBuilder,
         \Magento\Catalog\Model\Product\Attribute\Source\Status $productStatus,
         \Magento\Catalog\Model\Product\Visibility $productVisibility,
@@ -29,6 +29,7 @@ class Products extends \Magento\Framework\App\Action\Action
         $this->searchCriteria = $criteria;
         $this->searchCriteriaBuilder = $searchCriteriaBuilder;
         $this->filterGroup = $filterGroup;
+        $this->filterGroupBuilder    = $filterGroupBuilder;
         $this->filterBuilder = $filterBuilder;
         $this->productStatus = $productStatus;
         $this->productVisibility = $productVisibility;
@@ -68,35 +69,47 @@ class Products extends \Magento\Framework\App\Action\Action
               ->setDirection($orderBy)
               ->create();
 
-          $filters[] = $this->filterBuilder
+          $statusFilters[] = $this->filterBuilder
                   ->setField('status')
-                  ->setConditionType('in')
-                  ->setValue($this->productStatus->getVisibleStatusIds())
+                  ->setConditionType('eq')
+                  ->setValue(\Magento\Catalog\Model\Product\Attribute\Source\Status::STATUS_ENABLED)
                   ->create();
 
-          $filters[] = $this->filterBuilder
-                  ->setField('visibility')
-                  ->setConditionType('in')
-                  ->setValue($this->productVisibility->getVisibleInSiteIds())
-                  ->create();
           
-          $filters[] = $this->filterBuilder
+          $priceFilters1[] = $this->filterBuilder
                   ->setField('price')
-                  ->setConditionType('lteq')
+                  ->setConditionType('to')
                   ->setValue($highRange)
                   ->create();
 
-          $filters[] = $this->filterBuilder
+          $priceFilters2[] = $this->filterBuilder
                   ->setField('price')
-                  ->setConditionType('gteq')
+                  ->setConditionType('from')
                   ->setValue($lowRange)
                   ->create();
 
+          $filter_group = $this->filterGroupBuilder
+            ->setFilters($filters)
+            ->create();
+
+          $filter_group_status = $this->filterGroupBuilder
+            ->setFilters($statusFilters)
+            ->create();
+
+          $filter_group_price = $this->filterGroupBuilder
+            ->setFilters($priceFilters1)
+            ->create();
+
+          $filter_group_price2 = $this->filterGroupBuilder
+            ->setFilters($priceFilters2)
+            ->create();
+
+
           $this->searchCriteria = $this->searchCriteriaBuilder
+                  ->setFilterGroups([ $filter_group_status, $filter_group_price, $filter_group_price2])
                   ->setPageSize($perPage)
                   ->setCurrentPage($page)
                   ->addSortOrder($sortOrder)
-                  ->addFilters($filters)
                   ->create();
 
           $products = $this->productRepository->getList($this->searchCriteria);
