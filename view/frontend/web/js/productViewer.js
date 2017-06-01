@@ -101,7 +101,7 @@ define([
                     }, 
                     dataType: 'json',
                     success: function (data) { 
-                        if(typeof data === String){
+                        if(typeof data === 'string'){
                             alert(data);
                         }else{
                             self.renderProducts(data);
@@ -111,7 +111,6 @@ define([
             }
         });
     };
-
 
      ProductViewer.prototype.renderProducts = function(data) {
         var self = this;
