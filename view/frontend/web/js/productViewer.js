@@ -112,7 +112,7 @@ define([
         });
     };
 
-     ProductViewer.prototype.renderProducts = function(data) {
+    ProductViewer.prototype.renderProducts = function(data) {
         var self = this;
         $('#'+self.config.products).html("");
         _.each(data, function(item) {
@@ -121,7 +121,7 @@ define([
         });
 
 
-     };
+    };
 
     return ProductViewer;
 

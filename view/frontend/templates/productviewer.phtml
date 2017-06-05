@@ -5,7 +5,6 @@
         	<div class="col-sm-6">
         		<ul id="productList"></ul>
         	</div>
-
         </div>
 		<div class="row" id="range">
 			<div class="left field required col-sm-12">
@@ -32,7 +31,6 @@
 				<select name="sort" id="sort">
 					<option value="ASC" selected>ASC</option>
 					<option value="DESC">DESC</option>
-					
 				</select>
 	        </div>
           	<div class="actions-toolbar">
@@ -51,7 +49,7 @@
 <script type="text/html" id="productTemplate">
     <li>
     	<img class="thumb" src="<%= thumb %>"><br />
-        <a href="<%= url %>"><%= name %></a></strong><br />
+        <a href="<%= url %>"><%= name %></a><br />
         SKU: <%= sku %> QTY: <%= qty %><br />
     </li>
 </script>
